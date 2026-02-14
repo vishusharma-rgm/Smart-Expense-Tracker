@@ -32,6 +32,10 @@ export default function Dashboard() {
   const [resetMessage, setResetMessage] = useState("");
   const [simBudget, setSimBudget] = useState(0);
   const [listening, setListening] = useState(false);
+  const VoiceRecognition =
+    typeof window !== "undefined"
+      ? window.SpeechRecognition || window.webkitSpeechRecognition
+      : null;
   const isDemo = localStorage.getItem("demo_mode") === "true";
 
   /* ---------------- TOTALS ---------------- */
@@ -380,45 +384,57 @@ export default function Dashboard() {
             >
               Export
             </button>
-            <button
-              className="btn-voice px-4 py-2 text-sm tab-hover flex items-center gap-2"
-              onClick={() => {
-                const SpeechRecognition =
-                  window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (!SpeechRecognition) {
-                  alert("Voice input not supported in this browser.");
-                  return;
+          <button
+            className="btn-voice px-4 py-2 text-sm tab-hover flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={!VoiceRecognition}
+            onClick={() => {
+              if (!VoiceRecognition) {
+                alert("Voice input isn’t supported in this browser. Try Chrome.");
+                return;
+              }
+              if (
+                window.location.protocol !== "https:" &&
+                window.location.hostname !== "localhost"
+              ) {
+                alert("Voice input needs HTTPS. Open the live site.");
+                return;
+              }
+              if (listening) return;
+              const recognition = new VoiceRecognition();
+              recognition.lang = "en-IN";
+              recognition.interimResults = false;
+              recognition.maxAlternatives = 1;
+              recognition.onstart = () => setListening(true);
+              recognition.onend = () => setListening(false);
+              recognition.onerror = () => {
+                setListening(false);
+                alert("Mic access blocked. Allow microphone permissions.");
+              };
+              recognition.onresult = (event) => {
+                const text = event.results[0][0].transcript.toLowerCase();
+                const amountMatch = text.match(/(\d+)/);
+                const amount = amountMatch ? Number(amountMatch[1]) : 0;
+                const titleMatch = text.match(/for (.*)/);
+                const title = titleMatch ? titleMatch[1] : "Voice Expense";
+                if (amount > 0) {
+                  addExpense({
+                    title,
+                    amount,
+                    category: "Other",
+                    date: new Date().toISOString()
+                  }).then(() => fetchExpenses());
+                } else {
+                  alert("Couldn’t hear an amount. Say: Add expense ₹500 for Uber.");
                 }
-                const recognition = new SpeechRecognition();
-                recognition.lang = "en-IN";
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-                recognition.onstart = () => setListening(true);
-                recognition.onend = () => setListening(false);
-                recognition.onresult = (event) => {
-                  const text = event.results[0][0].transcript.toLowerCase();
-                  const amountMatch = text.match(/(\d+)/);
-                  const amount = amountMatch ? Number(amountMatch[1]) : 0;
-                  const titleMatch = text.match(/for (.*)/);
-                  const title = titleMatch ? titleMatch[1] : "Voice Expense";
-                  if (amount > 0) {
-                    // quick add expense
-                    addExpense({
-                      title,
-                      amount,
-                      category: "Other",
-                      date: new Date().toISOString()
-                    }).then(() => fetchExpenses());
-                  }
-                };
-                recognition.start();
-              }}
-            >
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/70 border border-white/60">
-                🎙️
-              </span>
-              {listening ? "Listening..." : "Voice Add"}
-            </button>
+              };
+              recognition.start();
+            }}
+          >
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/70 border border-white/60">
+              🎙️
+            </span>
+            {listening ? "Listening..." : "Voice Add"}
+          </button>
             <button
               onClick={async () => {
                 const ok = window.confirm(

@@ -36,7 +36,7 @@ function PrivateRoute({ children }) {
 
 function Layout({ children }) {
   return (
-    <div className="flex h-screen text-black dark:text-gray-100 transition-all duration-500">
+    <div className="flex h-screen text-primary bg-[var(--bg-main)] transition-all duration-500">
       <Sidebar />
       <div className="flex-1 flex flex-col relative">
         <Navbar />

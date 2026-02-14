@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function Navbar() {
-  const [dark, setDark] = useState(
-    localStorage.getItem("theme") === "dark"
-  );
+  const { dark, setDark } = useTheme();
   const navigate = useNavigate();
   const { logout } = useAuth();
   const isDemo = localStorage.getItem("demo_mode") === "true";
@@ -19,16 +18,6 @@ export default function Navbar() {
       return false;
     }
   });
-
-  useEffect(() => {
-    if (dark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  }, [dark]);
 
   useEffect(() => {
     document.body.classList.toggle("privacy-hide", !!privacyOn);
@@ -70,7 +59,7 @@ export default function Navbar() {
 
   return (
     <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-800 surface-muted">
-      <h1 className="text-xl font-semibold dark:text-white brand-title">
+      <h1 className="text-xl font-semibold text-primary brand-title">
         Smart Expense Tracker
       </h1>
 

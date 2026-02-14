@@ -58,7 +58,9 @@ export default function Navbar() {
   };
 
   return (
-    <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-800 surface-muted">
+    <div className="flex justify-between items-center p-6 border-b surface-muted"
+      style={{ borderColor: "var(--border-color)" }}
+    >
       <h1 className="text-xl font-semibold text-primary brand-title">
         Smart Expense Tracker
       </h1>

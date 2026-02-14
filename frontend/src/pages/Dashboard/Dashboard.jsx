@@ -303,174 +303,179 @@ export default function Dashboard() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div className="space-y-8 min-h-screen transition-colors duration-300 bg-gray-100 dark:bg-[#0f172a] p-6 rounded-2xl">
+    <div
+      className="space-y-8 min-h-screen transition-colors duration-300 p-6 rounded-2xl"
+      style={{ background: "var(--bg-main)" }}
+    >
 
       {/* HEADER */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Your Money, This Month
-          </h1>
-          <p className="text-sm text-secondary">
-            Quick view of today’s spend and monthly progress.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="surface surface-tint-2 px-4 py-2 rounded-xl text-sm">
-            <span className="text-secondary">Today</span>
-            <span className="ml-2 font-semibold text-primary">
-              {formatCurrency(
-                expenses
-                .filter((e) => {
-                  const d = new Date(e.date || e.createdAt || Date.now());
-                  const now = new Date();
-                  return (
-                    d.getFullYear() === now.getFullYear() &&
-                    d.getMonth() === now.getMonth() &&
-                    d.getDate() === now.getDate()
-                  );
-                })
-                .reduce((sum, e) => sum + Number(e.amount || 0), 0)
-              )}
-            </span>
+      <div className="surface surface-tint-1 p-6 rounded-2xl">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-primary">
+              Your Money, This Month
+            </h1>
+            <p className="text-sm text-secondary">
+              Quick view of today’s spend and monthly progress.
+            </p>
           </div>
-          <div className="surface surface-tint-3 px-4 py-2 rounded-xl text-sm">
-            <span className="text-secondary">Month Used</span>
-            <span className="ml-2 font-semibold text-primary">
-              {budget > 0
-                ? Math.min(
-                    Math.round((totalExpense / budget) * 100),
-                    100
-                  )
-                : 0}
-              %
-            </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="surface surface-tint-2 px-4 py-2 rounded-xl text-sm">
+              <span className="text-secondary">Today</span>
+              <span className="ml-2 font-semibold text-primary">
+                {formatCurrency(
+                  expenses
+                  .filter((e) => {
+                    const d = new Date(e.date || e.createdAt || Date.now());
+                    const now = new Date();
+                    return (
+                      d.getFullYear() === now.getFullYear() &&
+                      d.getMonth() === now.getMonth() &&
+                      d.getDate() === now.getDate()
+                    );
+                  })
+                  .reduce((sum, e) => sum + Number(e.amount || 0), 0)
+                )}
+              </span>
+            </div>
+            <div className="surface surface-tint-3 px-4 py-2 rounded-xl text-sm">
+              <span className="text-secondary">Month Used</span>
+              <span className="ml-2 font-semibold text-primary">
+                {budget > 0
+                  ? Math.min(
+                      Math.round((totalExpense / budget) * 100),
+                      100
+                    )
+                  : 0}
+                %
+              </span>
+            </div>
+            <div className="surface surface-tint-4 px-4 py-2 rounded-xl text-sm">
+              <span className="text-secondary">Status</span>
+              <span className="ml-2 font-semibold text-primary">
+                {budget > 0
+                  ? totalExpense <= budget
+                    ? "On Track"
+                    : "Over Budget"
+                  : "No Budget"}
+              </span>
+            </div>
           </div>
-          <div className="surface surface-tint-4 px-4 py-2 rounded-xl text-sm">
-            <span className="text-secondary">Status</span>
-            <span className="ml-2 font-semibold text-primary">
-              {budget > 0
-                ? totalExpense <= budget
-                  ? "On Track"
-                  : "Over Budget"
-                : "No Budget"}
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <button
-            className="btn-ghost px-3 py-2 text-sm tab-hover"
-            onClick={() => document.getElementById("add-expense")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            Add Expense
-          </button>
-          <button
-            className="btn-ghost px-3 py-2 text-sm tab-hover"
-            onClick={() => document.getElementById("add-income")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            Add Income
-          </button>
-          <button
-            className="btn-ghost px-3 py-2 text-sm tab-hover"
-            onClick={() => exportExpensesToCSV(expenses)}
-          >
-            Export
-          </button>
-          <button
-            className="btn-voice px-4 py-2 text-sm tab-hover flex items-center gap-2"
-            onClick={() => {
-              const SpeechRecognition =
-                window.SpeechRecognition || window.webkitSpeechRecognition;
-              if (!SpeechRecognition) {
-                alert("Voice input not supported in this browser.");
-                return;
-              }
-              const recognition = new SpeechRecognition();
-              recognition.lang = "en-IN";
-              recognition.interimResults = false;
-              recognition.maxAlternatives = 1;
-              recognition.onstart = () => setListening(true);
-              recognition.onend = () => setListening(false);
-              recognition.onresult = (event) => {
-                const text = event.results[0][0].transcript.toLowerCase();
-                const amountMatch = text.match(/(\d+)/);
-                const amount = amountMatch ? Number(amountMatch[1]) : 0;
-                const titleMatch = text.match(/for (.*)/);
-                const title = titleMatch ? titleMatch[1] : "Voice Expense";
-                if (amount > 0) {
-                  // quick add expense
-                  addExpense({
-                    title,
-                    amount,
-                    category: "Other",
-                    date: new Date().toISOString()
-                  }).then(() => fetchExpenses());
+          <div className="flex items-center gap-3">
+            <button
+              className="btn-ghost px-3 py-2 text-sm tab-hover"
+              onClick={() => document.getElementById("add-expense")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              Add Expense
+            </button>
+            <button
+              className="btn-ghost px-3 py-2 text-sm tab-hover"
+              onClick={() => document.getElementById("add-income")?.scrollIntoView({ behavior: "smooth" })}
+            >
+              Add Income
+            </button>
+            <button
+              className="btn-ghost px-3 py-2 text-sm tab-hover"
+              onClick={() => exportExpensesToCSV(expenses)}
+            >
+              Export
+            </button>
+            <button
+              className="btn-voice px-4 py-2 text-sm tab-hover flex items-center gap-2"
+              onClick={() => {
+                const SpeechRecognition =
+                  window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                  alert("Voice input not supported in this browser.");
+                  return;
                 }
-              };
-              recognition.start();
-            }}
-          >
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/70 border border-white/60">
-              🎙️
-            </span>
-            {listening ? "Listening..." : "Voice Add"}
-          </button>
-          <button
-            onClick={async () => {
-              const ok = window.confirm(
-                "This will delete all your expenses, income, and budgets. Continue?"
-              );
-              if (!ok) return;
-              try {
-                setResetting(true);
-                setResetMessage("");
-                if (isDemo) {
-                  await Promise.all([
-                    fetchExpenses(),
-                    fetchIncome(),
-                    fetchBudget(),
-                  ]);
-                  setResetMessage("Demo data has been reset.");
-                } else {
-                  await api.post("/reset");
-                  await Promise.all([
-                    fetchExpenses(),
-                    fetchIncome(),
-                    fetchBudget(),
-                  ]);
-                  setResetMessage("All data has been reset.");
-                }
-              } catch (err) {
-                setResetMessage(
-                  err.response?.data?.message || "Reset failed. Try again."
+                const recognition = new SpeechRecognition();
+                recognition.lang = "en-IN";
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+                recognition.onstart = () => setListening(true);
+                recognition.onend = () => setListening(false);
+                recognition.onresult = (event) => {
+                  const text = event.results[0][0].transcript.toLowerCase();
+                  const amountMatch = text.match(/(\d+)/);
+                  const amount = amountMatch ? Number(amountMatch[1]) : 0;
+                  const titleMatch = text.match(/for (.*)/);
+                  const title = titleMatch ? titleMatch[1] : "Voice Expense";
+                  if (amount > 0) {
+                    // quick add expense
+                    addExpense({
+                      title,
+                      amount,
+                      category: "Other",
+                      date: new Date().toISOString()
+                    }).then(() => fetchExpenses());
+                  }
+                };
+                recognition.start();
+              }}
+            >
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/70 border border-white/60">
+                🎙️
+              </span>
+              {listening ? "Listening..." : "Voice Add"}
+            </button>
+            <button
+              onClick={async () => {
+                const ok = window.confirm(
+                  "This will delete all your expenses, income, and budgets. Continue?"
                 );
-              } finally {
-                setResetting(false);
-              }
-            }}
-            className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
-            disabled={resetting}
-          >
-            {resetting ? "Resetting..." : "Reset All Data"}
-          </button>
+                if (!ok) return;
+                try {
+                  setResetting(true);
+                  setResetMessage("");
+                  if (isDemo) {
+                    await Promise.all([
+                      fetchExpenses(),
+                      fetchIncome(),
+                      fetchBudget(),
+                    ]);
+                    setResetMessage("Demo data has been reset.");
+                  } else {
+                    await api.post("/reset");
+                    await Promise.all([
+                      fetchExpenses(),
+                      fetchIncome(),
+                      fetchBudget(),
+                    ]);
+                    setResetMessage("All data has been reset.");
+                  }
+                } catch (err) {
+                  setResetMessage(
+                    err.response?.data?.message || "Reset failed. Try again."
+                  );
+                } finally {
+                  setResetting(false);
+                }
+              }}
+              className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={resetting}
+            >
+              {resetting ? "Resetting..." : "Reset All Data"}
+            </button>
+          </div>
         </div>
+
+        {resetMessage && (
+          <div className="surface-muted px-4 py-3 rounded-xl text-sm text-secondary mt-4">
+            {resetMessage}
+          </div>
+        )}
+
+        {alerts.length > 0 && (
+          <div className="surface surface-tint-3 p-4 rounded-2xl flex flex-wrap gap-2 mt-4">
+            {alerts.map((a, i) => (
+              <span key={i} className="text-sm text-secondary">
+                {a}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
-
-      {resetMessage && (
-        <div className="surface-muted px-4 py-3 rounded-xl text-sm text-secondary">
-          {resetMessage}
-        </div>
-      )}
-
-      {alerts.length > 0 && (
-        <div className="surface surface-tint-3 p-4 rounded-2xl flex flex-wrap gap-2">
-          {alerts.map((a, i) => (
-            <span key={i} className="text-sm text-secondary">
-              {a}
-            </span>
-          ))}
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="surface surface-tint-2 p-6 rounded-2xl fade-rise">

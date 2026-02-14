@@ -308,8 +308,7 @@ export default function Dashboard() {
 
   return (
     <div
-      className="space-y-8 min-h-screen transition-colors duration-300 p-6 rounded-2xl"
-      style={{ background: "var(--bg-main)" }}
+      className="dashboard-shell space-y-8 min-h-screen transition-colors duration-300 p-6 rounded-2xl"
     >
 
       {/* HEADER */}
@@ -385,58 +384,7 @@ export default function Dashboard() {
               Export
             </button>
           <button
-            className="btn-voice px-4 py-2 text-sm tab-hover flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-            disabled={!VoiceRecognition}
-            onClick={() => {
-              if (!VoiceRecognition) {
-                alert("Voice input isn’t supported in this browser. Try Chrome.");
-                return;
-              }
-              if (
-                window.location.protocol !== "https:" &&
-                window.location.hostname !== "localhost"
-              ) {
-                alert("Voice input needs HTTPS. Open the live site.");
-                return;
-              }
-              if (listening) return;
-              const recognition = new VoiceRecognition();
-              recognition.lang = "en-IN";
-              recognition.interimResults = false;
-              recognition.maxAlternatives = 1;
-              recognition.onstart = () => setListening(true);
-              recognition.onend = () => setListening(false);
-              recognition.onerror = () => {
-                setListening(false);
-                alert("Mic access blocked. Allow microphone permissions.");
-              };
-              recognition.onresult = (event) => {
-                const text = event.results[0][0].transcript.toLowerCase();
-                const amountMatch = text.match(/(\d+)/);
-                const amount = amountMatch ? Number(amountMatch[1]) : 0;
-                const titleMatch = text.match(/for (.*)/);
-                const title = titleMatch ? titleMatch[1] : "Voice Expense";
-                if (amount > 0) {
-                  addExpense({
-                    title,
-                    amount,
-                    category: "Other",
-                    date: new Date().toISOString()
-                  }).then(() => fetchExpenses());
-                } else {
-                  alert("Couldn’t hear an amount. Say: Add expense ₹500 for Uber.");
-                }
-              };
-              recognition.start();
-            }}
-          >
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/70 border border-white/60">
-              🎙️
-            </span>
-            {listening ? "Listening..." : "Voice Add"}
-          </button>
-            <button
-              onClick={async () => {
+            onClick={async () => {
                 const ok = window.confirm(
                   "This will delete all your expenses, income, and budgets. Continue?"
                 );
@@ -735,6 +683,60 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
         <div id="add-expense" className="surface surface-tint-1 p-6 rounded-xl transition">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Add Expense</h3>
+            <button
+              className="btn-voice px-3 py-2 text-sm tab-hover flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={!VoiceRecognition}
+              onClick={() => {
+                if (!VoiceRecognition) {
+                  alert("Voice input isn’t supported in this browser. Try Chrome.");
+                  return;
+                }
+                if (
+                  window.location.protocol !== "https:" &&
+                  window.location.hostname !== "localhost"
+                ) {
+                  alert("Voice input needs HTTPS. Open the live site.");
+                  return;
+                }
+                if (listening) return;
+                const recognition = new VoiceRecognition();
+                recognition.lang = "en-IN";
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+                recognition.onstart = () => setListening(true);
+                recognition.onend = () => setListening(false);
+                recognition.onerror = () => {
+                  setListening(false);
+                  alert("Mic access blocked. Allow microphone permissions.");
+                };
+                recognition.onresult = (event) => {
+                  const text = event.results[0][0].transcript.toLowerCase();
+                  const amountMatch = text.match(/(\d+)/);
+                  const amount = amountMatch ? Number(amountMatch[1]) : 0;
+                  const titleMatch = text.match(/for (.*)/);
+                  const title = titleMatch ? titleMatch[1] : "Voice Expense";
+                  if (amount > 0) {
+                    addExpense({
+                      title,
+                      amount,
+                      category: "Other",
+                      date: new Date().toISOString()
+                    }).then(() => fetchExpenses());
+                  } else {
+                    alert("Couldn’t hear an amount. Say: Add expense ₹500 for Uber.");
+                  }
+                };
+                recognition.start();
+              }}
+            >
+              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/70 border border-white/60">
+                🎙️
+              </span>
+              {listening ? "Listening..." : "Voice Add"}
+            </button>
+          </div>
           <AddExpense />
         </div>
 

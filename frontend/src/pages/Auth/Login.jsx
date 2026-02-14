@@ -61,29 +61,33 @@ export default function Login() {
 
         {isDemo && (
           <p className="text-xs text-gray-500 mb-4">
-            Demo requires sign in. Click Continue to enter demo mode.
+            Demo entry requires no credentials. Click Continue to enter demo mode.
           </p>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            onChange={handleChange}
-            required
-            className="w-full border rounded-md px-3 py-2 text-sm"
-          />
+          {!isDemo && (
+            <>
+              <input
+                name="email"
+                type="email"
+                placeholder="Email"
+                onChange={handleChange}
+                required
+                className="w-full border rounded-md px-3 py-2 text-sm"
+              />
 
-          <input
-            name="password"
-            type="password"
-            placeholder="Password"
-            onChange={handleChange}
-            required
-            className="w-full border rounded-md px-3 py-2 text-sm"
-          />
+              <input
+                name="password"
+                type="password"
+                placeholder="Password"
+                onChange={handleChange}
+                required
+                className="w-full border rounded-md px-3 py-2 text-sm"
+              />
+            </>
+          )}
 
           {error && (
             <div className="text-red-500 text-sm space-y-1">

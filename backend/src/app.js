@@ -32,9 +32,14 @@ app.use(cors({
 }));
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 500,
-  skip: (req) => req.method === "OPTIONS" || req.path.startsWith("/api/auth"),
+  windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000),
+  max: Number(process.env.RATE_LIMIT_MAX || 2000),
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) =>
+    req.method === "OPTIONS" ||
+    req.path.startsWith("/api/auth") ||
+    req.path.startsWith("/api/reset"),
 });
 
 app.use(limiter);

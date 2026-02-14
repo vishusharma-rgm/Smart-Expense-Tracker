@@ -28,6 +28,17 @@ export const BudgetProvider = ({ children }) => {
       setHistory(demoBudget.history || []);
       return;
     }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setBudget(0);
+      setBaseLimit(0);
+      setCarriedOver(0);
+      setCategoryLimits({});
+      setRolloverEnabled(true);
+      setHistory([]);
+      setError("");
+      return;
+    }
     try {
       setLoading(true);
       setError("");

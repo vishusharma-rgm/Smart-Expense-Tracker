@@ -12,6 +12,11 @@ export const IncomeProvider = ({ children }) => {
       setIncomes(demoIncomes);
       return;
     }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setIncomes([]);
+      return;
+    }
     try {
       const res = await api.get("/income");
       setIncomes(res.data);

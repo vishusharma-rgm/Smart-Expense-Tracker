@@ -62,7 +62,6 @@ export default function Navbar() {
       className="app-navbar flex justify-between items-center p-5 surface-muted"
     >
       <div className="flex items-center gap-3">
-        <span className="app-navbar__mark" aria-hidden="true" />
         <h1 className="text-xl font-semibold text-primary brand-title">
           Smart Expense Tracker
         </h1>

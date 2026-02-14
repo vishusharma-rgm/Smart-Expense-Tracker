@@ -71,14 +71,14 @@ export default function Landing() {
             </Link>
           </div>
           <div className="landing-human__note">
-            <span>Build date:</span>
-            <strong>Feb 14, 2026</strong>
+            <span>Release:</span>
+            <strong>Production‑ready build</strong>
           </div>
         </div>
 
         <div className="landing-human__notes">
           
-          <span className="margin-note note-right">privacy first</span>
+
           <div className="landing-human__note-card scribble">
             <div className="note-head">
               <span>Build Notes</span>

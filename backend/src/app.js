@@ -18,17 +18,22 @@ const app = express();
 // Security middleware
 app.use(helmet());
 
-const allowedOrigins = (process.env.CORS_ORIGINS || "http://localhost:5173")
+const rawCors = (process.env.CORS_ORIGINS || "http://localhost:5173")
   .split(",")
   .map((o) => o.trim())
   .filter(Boolean);
 
+const allowAllCors = rawCors.includes("*");
+const allowedOrigins = allowAllCors ? [] : rawCors;
+
 app.use(cors({
   origin: (origin, callback) => {
+    if (allowAllCors) return callback(null, true);
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) return callback(null, true);
     return callback(new Error("Not allowed by CORS"));
   },
+  optionsSuccessStatus: 204,
 }));
 
 const limiter = rateLimit({

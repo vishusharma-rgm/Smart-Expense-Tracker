@@ -880,11 +880,11 @@ h6 {
 }
 
 .dashboard-shell {
-  background: #f6f7fb;
+  background: var(--bg-main);
 }
 
 .dark .dashboard-shell {
-  background: #f6f7fb;
+  background: var(--bg-main);
 }
 
 

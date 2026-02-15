@@ -4,6 +4,61 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 
+const sendEmail = async ({ to, subject, html, text }) => {
+  const resendApiKey = (process.env.RESEND_API_KEY || "").trim();
+  const smtpFrom = process.env.SMTP_FROM || process.env.SMTP_USER;
+
+  if (resendApiKey) {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        from: smtpFrom || "Smart Expense Tracker <onboarding@resend.dev>",
+        to: [to],
+        subject,
+        html,
+        text
+      })
+    });
+
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`Resend API error: ${response.status} ${body}`);
+    }
+    return;
+  }
+
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
+    throw new Error("Email service not configured.");
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: Number(SMTP_PORT),
+    secure: Number(SMTP_PORT) === 465,
+    requireTLS: Number(SMTP_PORT) === 587,
+    connectionTimeout: 15000,
+    greetingTimeout: 10000,
+    socketTimeout: 20000,
+    auth: {
+      user: SMTP_USER,
+      pass: SMTP_PASS
+    }
+  });
+
+  await transporter.sendMail({
+    from: smtpFrom || SMTP_USER,
+    to,
+    subject,
+    html,
+    text
+  });
+};
+
 const resolveAppUrl = (req) => {
   const envAppUrl = (process.env.APP_URL || "").trim();
   if (envAppUrl) {
@@ -129,36 +184,9 @@ export const requestPasswordReset = async (req, res) => {
     user.resetTokenExp = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
 
-    const {
-      SMTP_HOST,
-      SMTP_PORT,
-      SMTP_USER,
-      SMTP_PASS,
-      SMTP_FROM
-    } = process.env;
-
-    if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-      return res.status(500).json({ message: "Email service not configured." });
-    }
-
-    const transporter = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: Number(SMTP_PORT),
-      secure: Number(SMTP_PORT) === 465,
-      requireTLS: Number(SMTP_PORT) === 587,
-      connectionTimeout: 15000,
-      greetingTimeout: 10000,
-      socketTimeout: 20000,
-      auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS
-      }
-    });
-
     const appUrl = resolveAppUrl(req);
     const resetLink = `${appUrl}/reset-password?token=${token}`;
-    await transporter.sendMail({
-      from: SMTP_FROM || SMTP_USER,
+    await sendEmail({
       to: normalizedEmail,
       subject: "Reset your password",
       html: `<p>Click the link to reset your password:</p><p><a href="${resetLink}">${resetLink}</a></p>`
@@ -201,36 +229,13 @@ export const resetPassword = async (req, res) => {
 
 export const testEmail = async (req, res) => {
   try {
-    const {
-      SMTP_HOST,
-      SMTP_PORT,
-      SMTP_USER,
-      SMTP_PASS,
-      SMTP_FROM
-    } = process.env;
-
-    if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
-      return res.status(500).json({ message: "Email service not configured." });
+    const testTo = process.env.SMTP_USER || process.env.TEST_EMAIL_TO;
+    if (!testTo) {
+      return res.status(500).json({ message: "Set SMTP_USER or TEST_EMAIL_TO for test email." });
     }
 
-    const transporter = nodemailer.createTransport({
-      host: SMTP_HOST,
-      port: Number(SMTP_PORT),
-      secure: Number(SMTP_PORT) === 465,
-      requireTLS: Number(SMTP_PORT) === 587,
-      connectionTimeout: 15000,
-      greetingTimeout: 10000,
-      socketTimeout: 20000,
-      auth: {
-        user: SMTP_USER,
-        pass: SMTP_PASS
-      }
-    });
-
-    await transporter.verify();
-    await transporter.sendMail({
-      from: SMTP_FROM || SMTP_USER,
-      to: SMTP_USER,
+    await sendEmail({
+      to: testTo,
       subject: "SMTP Test - Smart Expense Tracker",
       text: "This is a test email from your app SMTP config."
     });

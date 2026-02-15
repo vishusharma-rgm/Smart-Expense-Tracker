@@ -4,6 +4,20 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 
+const resolveAppUrl = (req) => {
+  const envAppUrl = (process.env.APP_URL || "").trim();
+  if (envAppUrl) {
+    return envAppUrl.replace(/\/+$/, "");
+  }
+
+  const origin = (req.headers.origin || "").trim();
+  if (origin) {
+    return origin.replace(/\/+$/, "");
+  }
+
+  return "http://localhost:5173";
+};
+
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -120,11 +134,10 @@ export const requestPasswordReset = async (req, res) => {
       SMTP_PORT,
       SMTP_USER,
       SMTP_PASS,
-      SMTP_FROM,
-      APP_URL
+      SMTP_FROM
     } = process.env;
 
-    if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS || !APP_URL) {
+    if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
       return res.status(500).json({ message: "Email service not configured." });
     }
 
@@ -138,7 +151,8 @@ export const requestPasswordReset = async (req, res) => {
       }
     });
 
-    const resetLink = `${APP_URL}/reset-password?token=${token}`;
+    const appUrl = resolveAppUrl(req);
+    const resetLink = `${appUrl}/reset-password?token=${token}`;
     await transporter.sendMail({
       from: SMTP_FROM || SMTP_USER,
       to: normalizedEmail,

@@ -145,6 +145,10 @@ export const requestPasswordReset = async (req, res) => {
       host: SMTP_HOST,
       port: Number(SMTP_PORT),
       secure: Number(SMTP_PORT) === 465,
+      requireTLS: Number(SMTP_PORT) === 587,
+      connectionTimeout: 15000,
+      greetingTimeout: 10000,
+      socketTimeout: 20000,
       auth: {
         user: SMTP_USER,
         pass: SMTP_PASS
@@ -213,6 +217,10 @@ export const testEmail = async (req, res) => {
       host: SMTP_HOST,
       port: Number(SMTP_PORT),
       secure: Number(SMTP_PORT) === 465,
+      requireTLS: Number(SMTP_PORT) === 587,
+      connectionTimeout: 15000,
+      greetingTimeout: 10000,
+      socketTimeout: 20000,
       auth: {
         user: SMTP_USER,
         pass: SMTP_PASS

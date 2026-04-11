@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
+import api from "../../services/api";
 
 const SETTINGS_KEY = "app_settings";
 
 const defaultSettings = {
-  theme: "system",
   currency: "INR",
   dateFormat: "DD/MM/YYYY",
   alertsBudget80: true,
@@ -18,7 +18,6 @@ const defaultSettings = {
 export default function Settings() {
   const [settings, setSettings] = useState(defaultSettings);
   const [saved, setSaved] = useState(false);
-  const [loaded, setLoaded] = useState(false);
   const [security, setSecurity] = useState({
     currentPassword: "",
     newPassword: "",
@@ -36,29 +35,8 @@ export default function Settings() {
     const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null");
     if (stored) {
       setSettings({ ...defaultSettings, ...stored });
-    } else {
-      const existingTheme = localStorage.getItem("theme");
-      if (existingTheme === "dark" || existingTheme === "light") {
-        setSettings((s) => ({ ...s, theme: existingTheme }));
-      }
     }
-    setLoaded(true);
   }, []);
-
-  useEffect(() => {
-    if (!loaded) return;
-    if (settings.theme === "dark") {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else if (settings.theme === "light") {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    } else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.classList.toggle("dark", prefersDark);
-      localStorage.setItem("theme", prefersDark ? "dark" : "light");
-    }
-  }, [settings.theme]);
 
   const handleSave = () => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
@@ -79,27 +57,14 @@ export default function Settings() {
       return;
     }
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3000/api/auth/change-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          currentPassword: security.currentPassword,
-          newPassword: security.newPassword
-        })
+      const res = await api.post("/auth/change-password", {
+        currentPassword: security.currentPassword,
+        newPassword: security.newPassword
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setSecurityMsg(data.message || "Unable to change password.");
-        return;
-      }
       setSecurityMsg("Password updated.");
       setSecurity({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (err) {
-      setSecurityMsg("Server error.");
+      setSecurityMsg(err.response?.data?.message || "Server error.");
     }
   };
 
@@ -139,15 +104,10 @@ export default function Settings() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password: privacyReset.accountPassword })
+      await api.post("/auth/login", {
+        email,
+        password: privacyReset.accountPassword
       });
-      if (!res.ok) {
-        setPrivacyMsg("Account password is incorrect.");
-        return;
-      }
       setSettings((s) => ({ ...s, privacyPass: privacyReset.newPass }));
       localStorage.setItem(
         SETTINGS_KEY,
@@ -155,8 +115,12 @@ export default function Settings() {
       );
       setPrivacyMsg("Privacy passcode updated.");
       setPrivacyReset({ accountPassword: "", newPass: "", confirmPass: "" });
-    } catch {
-      setPrivacyMsg("Unable to verify password.");
+    } catch (err) {
+      setPrivacyMsg(
+        err.response?.status === 400
+          ? "Account password is incorrect."
+          : "Unable to verify password."
+      );
     }
   };
 
@@ -207,11 +171,7 @@ export default function Settings() {
     const ok = window.confirm("Reset all app data and server data?");
     if (!ok) return;
     try {
-      const token = localStorage.getItem("token");
-      await fetch("http://localhost:3000/api/reset", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.post("/reset");
     } catch {
       // ignore
     }
@@ -230,24 +190,18 @@ export default function Settings() {
       <div className="surface surface-tint-1 p-6 rounded-2xl">
         <h1 className="text-2xl font-semibold text-primary">Settings</h1>
         <p className="text-sm text-secondary mt-1">
-          Personalize theme, currency, and formatting.
+          Personalize your dark workspace, currency, and formatting.
         </p>
       </div>
 
       <div className="surface surface-tint-2 p-6 rounded-2xl space-y-6">
         <div>
           <h2 className="text-lg font-semibold mb-2">Appearance</h2>
-          <div className="flex flex-wrap gap-3">
-            {["light", "dark"].map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setSettings((s) => ({ ...s, theme: t }))}
-                className={`btn-ghost px-3 py-2 text-sm ${settings.theme === t ? "accent-ring" : ""}`}
-              >
-                {t.charAt(0).toUpperCase() + t.slice(1)}
-              </button>
-            ))}
+          <div className="surface-muted rounded-2xl p-4">
+            <p className="text-sm text-primary">Interface mode is now fixed to dark.</p>
+            <p className="text-xs text-secondary mt-2">
+              Public pages and app screens stay visually consistent without a light mode toggle.
+            </p>
           </div>
         </div>
 

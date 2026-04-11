@@ -307,9 +307,7 @@ export default function Dashboard() {
   /* ---------------- UI ---------------- */
 
   return (
-    <div
-      className="dashboard-shell space-y-8 min-h-screen transition-colors duration-300 p-6 rounded-2xl"
-    >
+    <div className="dashboard-shell space-y-8 min-h-screen transition-colors duration-300 p-6">
 
       {/* HEADER */}
       <div className="surface surface-tint-1 p-6 rounded-2xl">
@@ -322,8 +320,8 @@ export default function Dashboard() {
               Quick view of today’s spend and monthly progress.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="surface surface-tint-2 px-4 py-2 rounded-xl text-sm">
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            <div className="px-1 py-1 text-sm">
               <span className="text-secondary">Today</span>
               <span className="ml-2 font-semibold text-primary">
                 {formatCurrency(
@@ -341,7 +339,7 @@ export default function Dashboard() {
                 )}
               </span>
             </div>
-            <div className="surface surface-tint-3 px-4 py-2 rounded-xl text-sm">
+            <div className="px-1 py-1 text-sm">
               <span className="text-secondary">Month Used</span>
               <span className="ml-2 font-semibold text-primary">
                 {budget > 0
@@ -353,7 +351,7 @@ export default function Dashboard() {
                 %
               </span>
             </div>
-            <div className="surface surface-tint-4 px-4 py-2 rounded-xl text-sm">
+            <div className="px-1 py-1 text-sm">
               <span className="text-secondary">Status</span>
               <span className="ml-2 font-semibold text-primary">
                 {budget > 0
@@ -364,7 +362,7 @@ export default function Dashboard() {
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <button
               className="btn-ghost px-3 py-2 text-sm tab-hover"
               onClick={() => document.getElementById("add-expense")?.scrollIntoView({ behavior: "smooth" })}
@@ -383,8 +381,8 @@ export default function Dashboard() {
             >
               Export
             </button>
-          <button
-            onClick={async () => {
+            <button
+              onClick={async () => {
                 const ok = window.confirm(
                   "This will delete all your expenses, income, and budgets. Continue?"
                 );
@@ -431,7 +429,7 @@ export default function Dashboard() {
         )}
 
         {alerts.length > 0 && (
-          <div className="surface surface-tint-3 p-4 rounded-2xl flex flex-wrap gap-2 mt-4">
+          <div className="flex flex-wrap gap-3 mt-4 border-t border-[color:var(--border-color)] pt-4">
             {alerts.map((a, i) => (
               <span key={i} className="text-sm text-secondary">
                 {a}
@@ -441,183 +439,55 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="surface surface-tint-2 p-6 rounded-2xl fade-rise">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Cashflow (This Month)</h3>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="surface surface-tint-4 p-4 rounded-xl">
-              <p className="text-xs text-secondary uppercase tracking-[0.2em]">Income</p>
-              <p className="text-xl font-semibold text-primary mt-2">
-                <span data-amount>{formatCurrency(cashflow.income)}</span>
-              </p>
-            </div>
-            <div className="surface surface-tint-5 p-4 rounded-xl">
-              <p className="text-xs text-secondary uppercase tracking-[0.2em]">Expense</p>
-              <p className="text-xl font-semibold text-primary mt-2">
-                <span data-amount>{formatCurrency(cashflow.expense)}</span>
-              </p>
+      <div className="surface surface-tint-2 p-6 rounded-2xl fade-rise">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div>
+            <h3 className="text-lg font-semibold">Cashflow</h3>
+            <p className="text-sm text-secondary mt-1">This month income vs expense.</p>
+            <div className="mt-4 space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-secondary">Income</span>
+                <span className="font-semibold text-primary" data-amount>{formatCurrency(cashflow.income)}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-secondary">Expense</span>
+                <span className="font-semibold text-primary" data-amount>{formatCurrency(cashflow.expense)}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="surface surface-tint-6 p-6 rounded-2xl fade-rise">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Savings Meter</h3>
-          </div>
-          {goals.length === 0 ? (
-            <p className="text-sm text-secondary">No goals yet.</p>
-          ) : (
-            goals.slice(0, 1).map((g) => {
-              const progress = g.target
-                ? Math.min(((totalIncome - totalExpense) / g.target) * 100, 100)
-                : 0;
-              return (
-                <div key={g.id}>
-                  <p className="text-sm text-secondary">
-                    {g.title} • <span data-amount>{formatCurrency(g.target)}</span>
-                  </p>
-                  <div className="h-2 rounded-full bg-[color:var(--border-color)] overflow-hidden mt-2">
-                    <div className="h-full bg-green-500" style={{ width: `${progress}%` }} />
+          <div>
+            <h3 className="text-lg font-semibold">Goal</h3>
+            {goals.length === 0 ? (
+              <p className="text-sm text-secondary mt-3">No goals yet.</p>
+            ) : (
+              goals.slice(0, 1).map((g) => {
+                const progress = g.target
+                  ? Math.min(((totalIncome - totalExpense) / g.target) * 100, 100)
+                  : 0;
+                return (
+                  <div key={g.id} className="mt-3">
+                    <p className="text-sm text-secondary">
+                      {g.title} • <span data-amount>{formatCurrency(g.target)}</span>
+                    </p>
+                    <div className="h-2 rounded-full bg-[color:var(--border-color)] overflow-hidden mt-2">
+                      <div className="h-full bg-green-500" style={{ width: `${progress}%` }} />
+                    </div>
+                    <p className="text-xs text-secondary mt-2">Progress {Math.round(progress)}%</p>
                   </div>
-                  <p className="text-xs text-secondary mt-2">
-                    Progress {Math.round(progress)}%
-                  </p>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
+                );
+              })
+            )}
+          </div>
 
-      <div className="surface surface-tint-5 p-6 rounded-2xl fade-rise">
-        <h3 className="text-lg font-semibold mb-4">Budget Simulator</h3>
-        <input
-          type="range"
-          min="0"
-          max="100000"
-          step="1000"
-          value={simBudget}
-          onChange={(e) => setSimBudget(Number(e.target.value))}
-          className="w-full"
-        />
-        <div className="mt-3 flex flex-wrap gap-4 text-sm text-secondary">
-          <span>Sim Budget: <span data-amount>{formatCurrency(simBudget)}</span></span>
-          <span>Remaining: <span data-amount>{formatCurrency(simulated.remain)}</span></span>
-          <span>Savings Rate: {simulated.rate}%</span>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="surface surface-tint-1 p-6 rounded-2xl fade-rise">
-          <h3 className="text-lg font-semibold mb-4">Mini Trend (7 days)</h3>
-          <ResponsiveContainer width="100%" height={160}>
-            <AreaChart data={last7Trend}>
-              <defs>
-                <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.35} />
-                  <stop offset="100%" stopColor="#0ea5e9" stopOpacity={0.05} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="day" />
-              <YAxis />
-              <Tooltip />
-              <Area type="monotone" dataKey="value" stroke="#0ea5e9" fill="url(#trendFill)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="surface surface-tint-2 p-6 rounded-2xl fade-rise">
-          <h3 className="text-lg font-semibold mb-4">Category Split</h3>
-          {categorySplit.length === 0 ? (
-            <p className="text-sm text-secondary">No data found.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={160}>
-              <PieChart>
-                <Pie
-                  data={categorySplit}
-                  dataKey="value"
-                  nameKey="name"
-                  outerRadius={60}
-                  stroke="var(--bg-card)"
-                  strokeWidth={2}
-                >
-                  {categorySplit.map((_, i) => (
-                    <Cell key={i} fill={["#22c55e", "#f59e0b", "#38bdf8", "#f97316", "#a78bfa"][i % 5]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        <div className="surface surface-tint-3 p-6 rounded-2xl fade-rise">
-          <h3 className="text-lg font-semibold mb-4">Top Merchants</h3>
-          {topMerchants.length === 0 ? (
-            <p className="text-sm text-secondary">No merchant data.</p>
-          ) : (
-            <div className="space-y-3">
-              {topMerchants.map((m) => (
-                <div key={m.merchant} className="flex items-center justify-between">
-                  <span className="capitalize">{m.merchant}</span>
-                  <span data-amount>{formatCurrency(m.total)}</span>
-                </div>
+          <div>
+            <h3 className="text-lg font-semibold">Notes</h3>
+            <div className="mt-3 space-y-3 text-sm text-secondary">
+              {insights.map((line, idx) => (
+                <p key={idx}>{line}</p>
               ))}
             </div>
-          )}
-        </div>
-      </div>
-
-      <div className="surface surface-tint-4 p-6 rounded-2xl fade-rise">
-        <div className="flex items-center gap-3 mb-4">
-          <GlassyCalendarIcon size={28} />
-          <h3 className="text-lg font-semibold">Calendar Strip</h3>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          {upcomingBills.length === 0 ? (
-            <p className="text-sm text-secondary">No upcoming bills.</p>
-          ) : (
-            upcomingBills.map((b) => (
-              <div key={b.id} className="surface surface-tint-5 p-3 rounded-xl">
-                <p className="text-sm font-medium">{b.name}</p>
-                <p className="text-xs text-secondary">
-                  Due {formatDate(b.dueDate)}
-                </p>
-                <p className="text-xs text-secondary">
-                  <span data-amount>{formatCurrency(b.amount)}</span>
-                </p>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
-
-      <div className="surface surface-tint-2 p-6 rounded-2xl fade-rise relative overflow-hidden">
-        <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-amber-300/30 blur-2xl" />
-        <div className="flex items-center justify-between mb-4 relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white/70 flex items-center justify-center shadow-sm border border-white/60">
-              <span className="text-lg">✨</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold">AI Smart Insights</h3>
-              <p className="text-xs text-secondary">Personalized summary</p>
-            </div>
           </div>
-          <span className="text-xs uppercase tracking-[0.2em] text-secondary">
-            Premium
-          </span>
-        </div>
-        <div className="grid gap-3 relative z-10">
-          {insights.map((line, idx) => (
-            <div key={idx} className="surface surface-tint-2 p-3 rounded-xl flex items-start gap-2">
-              <span className="text-amber-500">•</span>
-              <p className="text-sm text-secondary">{line}</p>
-            </div>
-          ))}
         </div>
       </div>
 
@@ -650,24 +520,6 @@ export default function Dashboard() {
         />
 
         <Card
-          title="Top Spending Category"
-          value={
-            topCategory
-              ? `${topCategory.name} — ${formatCurrency(topCategory.amount)}`
-              : "None"
-          }
-          color="text-gray-900 dark:text-gray-100"
-          tintClass="surface-tint-4 card-hover"
-        />
-
-        <Card
-          title="Forecast Next Month"
-          value={formatCurrency(forecast)}
-          color="text-orange-500"
-          tintClass="surface-tint-5 card-hover"
-        />
-
-        <Card
           title="Budget Remaining"
           value={formatCurrency(remaining)}
           color={
@@ -675,69 +527,69 @@ export default function Dashboard() {
               ? "text-green-500"
               : "text-red-500"
           }
-          tintClass="surface-tint-6 card-hover"
+          tintClass="surface-tint-4 card-hover"
         />
       </div>
 
       {/* FORMS SECTION */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-
         <div id="add-expense" className="surface surface-tint-1 p-6 rounded-xl transition">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold">Add Expense</h3>
-            <button
-              className="btn-voice px-3 py-2 text-sm tab-hover flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-              disabled={!VoiceRecognition}
-              onClick={() => {
-                if (!VoiceRecognition) {
-                  alert("Voice input isn’t supported in this browser. Try Chrome.");
-                  return;
-                }
-                if (
-                  window.location.protocol !== "https:" &&
-                  window.location.hostname !== "localhost"
-                ) {
-                  alert("Voice input needs HTTPS. Open the live site.");
-                  return;
-                }
-                if (listening) return;
-                const recognition = new VoiceRecognition();
-                recognition.lang = "en-IN";
-                recognition.interimResults = false;
-                recognition.maxAlternatives = 1;
-                recognition.onstart = () => setListening(true);
-                recognition.onend = () => setListening(false);
-                recognition.onerror = () => {
-                  setListening(false);
-                  alert("Mic access blocked. Allow microphone permissions.");
-                };
-                recognition.onresult = (event) => {
-                  const text = event.results[0][0].transcript.toLowerCase();
-                  const amountMatch = text.match(/(\d+)/);
-                  const amount = amountMatch ? Number(amountMatch[1]) : 0;
-                  const titleMatch = text.match(/for (.*)/);
-                  const title = titleMatch ? titleMatch[1] : "Voice Expense";
-                  if (amount > 0) {
-                    addExpense({
-                      title,
-                      amount,
-                      category: "Other",
-                      date: new Date().toISOString()
-                    }).then(() => fetchExpenses());
-                  } else {
-                    alert("Couldn’t hear an amount. Say: Add expense ₹500 for Uber.");
+          <AddExpense
+            headerAction={
+              <button
+                type="button"
+                className="btn-voice px-3 py-2 text-sm tab-hover flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={!VoiceRecognition}
+                onClick={() => {
+                  if (!VoiceRecognition) {
+                    alert("Voice input isn’t supported in this browser. Try Chrome.");
+                    return;
                   }
-                };
-                recognition.start();
-              }}
-            >
-              <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/70 border border-white/60">
-                🎙️
-              </span>
-              {listening ? "Listening..." : "Voice Add"}
-            </button>
-          </div>
-          <AddExpense />
+                  if (
+                    window.location.protocol !== "https:" &&
+                    window.location.hostname !== "localhost"
+                  ) {
+                    alert("Voice input needs HTTPS. Open the live site.");
+                    return;
+                  }
+                  if (listening) return;
+                  const recognition = new VoiceRecognition();
+                  recognition.lang = "en-IN";
+                  recognition.interimResults = false;
+                  recognition.maxAlternatives = 1;
+                  recognition.onstart = () => setListening(true);
+                  recognition.onend = () => setListening(false);
+                  recognition.onerror = () => {
+                    setListening(false);
+                    alert("Mic access blocked. Allow microphone permissions.");
+                  };
+                  recognition.onresult = (event) => {
+                    const text = event.results[0][0].transcript.toLowerCase();
+                    const amountMatch = text.match(/(\d+)/);
+                    const amount = amountMatch ? Number(amountMatch[1]) : 0;
+                    const titleMatch = text.match(/for (.*)/);
+                    const title = titleMatch ? titleMatch[1] : "Voice Expense";
+                    if (amount > 0) {
+                      addExpense({
+                        title,
+                        amount,
+                        category: "Other",
+                        date: new Date().toISOString()
+                      }).then(() => fetchExpenses());
+                    } else {
+                      alert("Couldn’t hear an amount. Say: Add expense ₹500 for Uber.");
+                    }
+                  };
+                  recognition.start();
+                }}
+              >
+                <span className="voice-badge inline-flex items-center justify-center w-5 h-5 rounded-full">
+                  🎙️
+                </span>
+                {listening ? "Listening..." : "Voice Add"}
+              </button>
+            }
+          />
         </div>
 
         <div className="space-y-6">
@@ -746,12 +598,11 @@ export default function Dashboard() {
           </div>
           <IncomeList />
         </div>
-
       </div>
 
       {/* RECENT EXPENSES */}
       <div id="recent-expenses">
-        <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+        <h2 className="text-xl font-semibold mb-4 text-primary">
           Recent Expenses
         </h2>
         <ExpenseList />
@@ -765,16 +616,13 @@ export default function Dashboard() {
 
 function Card({ title, value, color, tintClass }) {
   return (
-    <div className={`surface ${tintClass} p-6 rounded-xl shadow-sm transition`}>
-
-      <p className="text-sm text-gray-500 dark:text-gray-400">
+    <div className={`surface ${tintClass} p-6 rounded-xl transition`}>
+      <p className="text-sm text-secondary">
         {title}
       </p>
-
       <h2 className={`text-xl font-semibold mt-2 ${color}`}>
         <span data-amount>{value}</span>
       </h2>
-
     </div>
   );
 }

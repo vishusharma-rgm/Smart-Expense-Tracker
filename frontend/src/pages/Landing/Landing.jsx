@@ -77,8 +77,6 @@ export default function Landing() {
         </div>
 
         <div className="landing-human__notes">
-          
-
           <div className="landing-human__note-card scribble">
             <div className="note-head">
               <span>Build Notes</span>
@@ -96,8 +94,6 @@ export default function Landing() {
               <span className="note-tag">Budget</span>
             </div>
           </div>
-
-
         </div>
       </main>
 

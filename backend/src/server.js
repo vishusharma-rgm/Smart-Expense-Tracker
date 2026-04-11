@@ -3,6 +3,11 @@ import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 
 dotenv.config();
+
+if (!process.env.JWT_SECRET) {
+  throw new Error("JWT_SECRET is required to start the backend.");
+}
+
 connectDB();
 
 const PORT = process.env.PORT || 3000;

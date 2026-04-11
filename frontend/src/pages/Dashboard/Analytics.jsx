@@ -1,355 +1,175 @@
-// import { useState, useMemo } from "react";
-// import { useExpenses } from "../../context/ExpenseContext";
-// import { useTheme } from "../../context/ThemeContext";
-// import {
-//   PieChart,
-//   Pie,
-//   Cell,
-//   Tooltip,
-//   BarChart,
-//   Bar,
-//   XAxis,
-//   YAxis,
-//   CartesianGrid,
-// } from "recharts";
-// import { exportExpensesToCSV } from "../../utils/exportCSV";
-
-// export default function Analytics() {
-//   const { expenses } = useExpenses();
-//   const { dark } = useTheme();
-
-//   const [search, setSearch] = useState("");
-//   const [categoryFilter, setCategoryFilter] = useState("All");
-
-//   const COLORS = dark
-//     ? ["#38bdf8", "#22c55e", "#f59e0b", "#a78bfa", "#e2e8f0"]
-//     : ["#111827", "#374151", "#6B7280", "#9CA3AF", "#D1D5DB"];
-
-//   /* ================= FILTER SYSTEM ================= */
-
-//   const filteredExpenses = useMemo(() => {
-//     return expenses.filter((exp) => {
-//       const matchSearch = exp.title
-//         .toLowerCase()
-//         .includes(search.toLowerCase());
-
-//       const matchCategory =
-//         categoryFilter === "All" ||
-//         exp.category === categoryFilter;
-
-//       return matchSearch && matchCategory;
-//     });
-//   }, [expenses, search, categoryFilter]);
-
-//   /* ================= CATEGORY BREAKDOWN ================= */
-
-//   const categoryMap = {};
-//   filteredExpenses.forEach((exp) => {
-//     categoryMap[exp.category] =
-//       (categoryMap[exp.category] || 0) + exp.amount;
-//   });
-
-//   const pieData = Object.keys(categoryMap).map((key) => ({
-//     name: key,
-//     value: categoryMap[key],
-//   }));
-
-//   /* ================= MONTHLY COMPARISON ================= */
-
-//   const now = new Date();
-//   const currentMonth = now.getMonth();
-//   const currentYear = now.getFullYear();
-
-//   let thisMonthTotal = 0;
-//   let lastMonthTotal = 0;
-
-//   filteredExpenses.forEach((exp) => {
-//     const d = new Date(exp.date);
-
-//     if (
-//       d.getMonth() === currentMonth &&
-//       d.getFullYear() === currentYear
-//     ) {
-//       thisMonthTotal += exp.amount;
-//     }
-
-//     if (
-//       d.getMonth() === currentMonth - 1 &&
-//       d.getFullYear() === currentYear
-//     ) {
-//       lastMonthTotal += exp.amount;
-//     }
-//   });
-
-//   /* ================= TOP CATEGORY ================= */
-
-//   const sortedCategories = [...pieData].sort(
-//     (a, b) => b.value - a.value
-//   );
-
-//   const topCategory = sortedCategories[0];
-
-//   /* ================= FORECAST ================= */
-
-//   const averageMonthlySpend =
-//     (thisMonthTotal + lastMonthTotal) / 2;
-
-//   const forecastNextMonth = Math.round(
-//     averageMonthlySpend || 0
-//   );
-
-//   return (
-//     <div className="space-y-10">
-
-//       {/* HEADER */}
-//       <div className="flex justify-between items-center">
-//         <h1 className="text-3xl font-semibold tracking-tight">
-//           Analytics
-//         </h1>
-
-//         <button
-//           onClick={() =>
-//             exportExpensesToCSV(filteredExpenses)
-//           }
-//           className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 transition"
-//         >
-//           Export CSV
-//         </button>
-//       </div>
-
-//       {/* SEARCH + FILTER */}
-//       <div className="surface p-6 rounded-2xl flex gap-4">
-//         <input
-//           type="text"
-//           placeholder="Search expense..."
-//           value={search}
-//           onChange={(e) => setSearch(e.target.value)}
-//           className="border px-3 py-2 rounded w-full bg-transparent text-[color:var(--text-primary)] placeholder:text-[color:var(--text-secondary)]"
-//         />
-
-//         <select
-//           value={categoryFilter}
-//           onChange={(e) =>
-//             setCategoryFilter(e.target.value)
-//           }
-//           className="border px-3 py-2 rounded bg-transparent text-[color:var(--text-primary)]"
-//         >
-//           <option value="All">All</option>
-//           <option value="Food">Food</option>
-//           <option value="Travel">Travel</option>
-//           <option value="Housing">Housing</option>
-//           <option value="Shopping">Shopping</option>
-//           <option value="Other">Other</option>
-//         </select>
-//       </div>
-
-//       {/* PIE CHART */}
-//       <div className="surface p-6 rounded-2xl">
-//         <h2 className="text-lg font-semibold mb-4">
-//           Category Breakdown
-//         </h2>
-
-//         <PieChart width={400} height={300}>
-//           <Pie
-//             data={pieData}
-//             dataKey="value"
-//             nameKey="name"
-//             outerRadius={100}
-//             label
-//           >
-//             {pieData.map((entry, index) => (
-//               <Cell
-//                 key={`cell-${index}`}
-//                 fill={
-//                   COLORS[index % COLORS.length]
-//                 }
-//               />
-//             ))}
-//           </Pie>
-//           <Tooltip />
-//         </PieChart>
-//       </div>
-
-//       {/* MONTHLY COMPARISON */}
-//       <div className="surface p-6 rounded-2xl">
-//         <h2 className="text-lg font-semibold mb-4">
-//           Monthly Comparison
-//         </h2>
-
-//         <BarChart
-//           width={500}
-//           height={300}
-//           data={[
-//             {
-//               name: "Last Month",
-//               value: lastMonthTotal,
-//             },
-//             {
-//               name: "This Month",
-//               value: thisMonthTotal,
-//             },
-//           ]}
-//         >
-//           <CartesianGrid
-//             stroke={dark ? "#1f2a3d" : "#e5e7eb"}
-//             strokeDasharray="3 3"
-//           />
-//           <XAxis dataKey="name" stroke={dark ? "#93a4bf" : "#6b7280"} />
-//           <YAxis stroke={dark ? "#93a4bf" : "#6b7280"} />
-//           <Tooltip />
-//           <Bar
-//             dataKey="value"
-//             fill={dark ? "#38bdf8" : "#111827"}
-//           />
-//         </BarChart>
-//       </div>
-
-//       {/* TOP CATEGORY */}
-//       {topCategory && (
-//         <div className="surface p-6 rounded-2xl">
-//           <h2 className="text-lg font-semibold">
-//             Top Spending Category
-//           </h2>
-//           <p className="mt-2 text-xl">
-//             {topCategory.name} — ₹
-//             {topCategory.value}
-//           </p>
-//         </div>
-//       )}
-
-//       {/* FORECAST */}
-//       <div className="surface p-6 rounded-2xl">
-//         <h2 className="text-lg font-semibold">
-//           Forecast (Next Month Estimate)
-//         </h2>
-//         <p className="mt-2 text-xl">
-//           ₹{forecastNextMonth}
-//         </p>
-//       </div>
-
-//     </div>
-//   );
-// }
-import { useState, useMemo } from "react";
-import { useExpenses } from "../../context/ExpenseContext";
-import { useTheme } from "../../context/ThemeContext";
+import { useMemo, useState } from "react";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  ResponsiveContainer,
-  Legend,
 } from "recharts";
+import { useExpenses } from "../../context/ExpenseContext";
+import { useBudget } from "../../context/BudgetContext";
 import { exportExpensesToCSV } from "../../utils/exportCSV";
 import { formatCurrency } from "../../utils/formatters";
 
+const CATEGORY_ORDER = ["Food", "Travel", "Housing", "Shopping", "Other"];
+
+const normalizeDate = (value, fallback) => {
+  const date = new Date(value || fallback || Date.now());
+  const year = date.getFullYear();
+  if (Number.isNaN(date.getTime()) || year < 2000 || year > 2100) {
+    return new Date(fallback || Date.now());
+  }
+  return date;
+};
+
+const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+const monthKey = (date) =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+
 export default function Analytics() {
   const { expenses } = useExpenses();
-  const { dark } = useTheme();
-
+  const { budget } = useBudget();
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
 
-  /* ================= COLORS ================= */
+  const normalizedExpenses = useMemo(
+    () =>
+      expenses.map((expense) => ({
+        ...expense,
+        amount: Number(expense.amount || 0),
+        normalizedDate: normalizeDate(expense.date, expense.createdAt),
+      })),
+    [expenses]
+  );
 
-  const getValueColor = (value) => {
-    const v = Number(value || 0);
-    if (v >= 2000) return dark ? "#ef4444" : "#dc2626"; // 2000+
-    if (v >= 1500) return dark ? "#f97316" : "#ea580c"; // 1500-1999
-    if (v >= 1000) return dark ? "#f59e0b" : "#d97706"; // 1000-1499
-    if (v >= 500) return dark ? "#38bdf8" : "#0ea5e9"; // 500-999
-    return dark ? "#22c55e" : "#16a34a"; // < 500
-  };
-
-  /* ================= FILTER SYSTEM ================= */
-
-  const filteredExpenses = useMemo(() => {
-    return expenses.filter((exp) => {
-      const matchSearch = exp.title
-        ?.toLowerCase()
-        .includes(search.toLowerCase());
-
-      const matchCategory =
-        categoryFilter === "All" ||
-        exp.category === categoryFilter;
-
-      return matchSearch && matchCategory;
-    });
-  }, [expenses, search, categoryFilter]);
-
-  /* ================= CATEGORY BREAKDOWN ================= */
-
-  const pieData = filteredExpenses.map((exp, index) => ({
-    name: exp.title || exp.category || `Item ${index + 1}`,
-    value: Number(exp.amount || 0),
-  }));
-  const hasPieData = pieData.length > 0;
-  const pieDisplayData = hasPieData
-    ? pieData
-    : [{ name: "No Data", value: 1 }];
-
-  /* ================= MONTHLY COMPARISON ================= */
+  const filteredExpenses = useMemo(
+    () =>
+      normalizedExpenses.filter((expense) => {
+        const matchesSearch = (expense.title || "")
+          .toLowerCase()
+          .includes(search.toLowerCase());
+        const matchesCategory =
+          categoryFilter === "All" || (expense.category || "Other") === categoryFilter;
+        return matchesSearch && matchesCategory;
+      }),
+    [categoryFilter, normalizedExpenses, search]
+  );
 
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
+  const currentMonthStart = new Date(currentYear, currentMonth, 1);
+  const lastMonthStart = new Date(currentYear, currentMonth - 1, 1);
+  const thisWeekStart = startOfDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay()));
+  const previousWeekStart = new Date(thisWeekStart);
+  previousWeekStart.setDate(previousWeekStart.getDate() - 7);
 
-  let thisMonthTotal = 0;
-  let lastMonthTotal = 0;
+  const categoryBreakdown = useMemo(() => {
+    const totals = filteredExpenses.reduce((acc, expense) => {
+      const key = expense.category || "Other";
+      acc[key] = (acc[key] || 0) + expense.amount;
+      return acc;
+    }, {});
 
-  filteredExpenses.forEach((exp) => {
-    const rawDate = exp.date || exp.createdAt || Date.now();
-    let d = new Date(rawDate);
-    const year = d.getFullYear();
-    if (Number.isNaN(d.getTime()) || year < 2000 || year > 2100) {
-      d = new Date(exp.createdAt || Date.now());
+    return CATEGORY_ORDER.filter((category) => totals[category] > 0).map((category) => ({
+      name: category,
+      value: totals[category],
+    }));
+  }, [filteredExpenses]);
+
+  const monthlyTrend = useMemo(() => {
+    const buckets = new Map();
+
+    for (let index = 5; index >= 0; index -= 1) {
+      const date = new Date(currentYear, currentMonth - index, 1);
+      buckets.set(monthKey(date), {
+        label: date.toLocaleString("en-IN", { month: "short" }),
+        total: 0,
+      });
     }
 
-    if (
-      d.getMonth() === currentMonth &&
-      d.getFullYear() === currentYear
-    ) {
-      thisMonthTotal += Number(exp.amount || 0);
-    }
+    filteredExpenses.forEach((expense) => {
+      const key = monthKey(expense.normalizedDate);
+      if (buckets.has(key)) {
+        buckets.get(key).total += expense.amount;
+      }
+    });
 
-    if (
-      d.getMonth() === currentMonth - 1 &&
-      d.getFullYear() === currentYear
-    ) {
-      lastMonthTotal += Number(exp.amount || 0);
-    }
-  });
+    return Array.from(buckets.values());
+  }, [currentMonth, currentYear, filteredExpenses]);
 
-  /* ================= TOP CATEGORY ================= */
-
-  const sortedCategories = [...pieData].sort(
-    (a, b) => b.value - a.value
+  const thisMonthTotal = useMemo(
+    () =>
+      filteredExpenses
+        .filter(
+          (expense) =>
+            expense.normalizedDate.getMonth() === currentMonth &&
+            expense.normalizedDate.getFullYear() === currentYear
+        )
+        .reduce((sum, expense) => sum + expense.amount, 0),
+    [currentMonth, currentYear, filteredExpenses]
   );
 
-  const topCategory = sortedCategories[0];
-
-  /* ================= FORECAST ================= */
-
-  const averageMonthlySpend =
-    (thisMonthTotal + lastMonthTotal) / 2;
-
-  const forecastNextMonth = Math.round(
-    averageMonthlySpend || 0
+  const lastMonthTotal = useMemo(
+    () =>
+      filteredExpenses
+        .filter(
+          (expense) =>
+            expense.normalizedDate >= lastMonthStart &&
+            expense.normalizedDate < currentMonthStart
+        )
+        .reduce((sum, expense) => sum + expense.amount, 0),
+    [currentMonthStart, filteredExpenses, lastMonthStart]
   );
 
-  /* ================= UI ================= */
-  const totalSpend = pieData.reduce(
-    (sum, item) => sum + Number(item.value || 0),
-    0
+  const thisWeekTotal = useMemo(
+    () =>
+      filteredExpenses
+        .filter((expense) => expense.normalizedDate >= thisWeekStart)
+        .reduce((sum, expense) => sum + expense.amount, 0),
+    [filteredExpenses, thisWeekStart]
   );
 
+  const previousWeekTotal = useMemo(
+    () =>
+      filteredExpenses
+        .filter(
+          (expense) =>
+            expense.normalizedDate >= previousWeekStart &&
+            expense.normalizedDate < thisWeekStart
+        )
+        .reduce((sum, expense) => sum + expense.amount, 0),
+    [filteredExpenses, previousWeekStart, thisWeekStart]
+  );
 
+  const topCategory = categoryBreakdown[0]
+    ? [...categoryBreakdown].sort((a, b) => b.value - a.value)[0]
+    : null;
+  const avgDailySpend = thisMonthTotal / Math.max(now.getDate(), 1);
+  const recentMonths = monthlyTrend.map((item) => item.total).filter((value) => value > 0);
+  const forecastNextMonth = recentMonths.length
+    ? Math.round(recentMonths.reduce((sum, value) => sum + value, 0) / recentMonths.length)
+    : 0;
+  const weeklyDelta = thisWeekTotal - previousWeekTotal;
+  const weeklyDeltaPct = previousWeekTotal > 0 ? Math.round((weeklyDelta / previousWeekTotal) * 100) : 0;
+  const budgetUsage = budget > 0 ? Math.round((thisMonthTotal / budget) * 100) : 0;
+  const budgetSignal =
+    budget <= 0
+      ? "Set a budget to unlock overspending alerts."
+      : budgetUsage >= 100
+        ? "Budget exceeded. Slow discretionary spending this week."
+        : budgetUsage >= 85
+          ? "You are close to budget. Track food and shopping carefully."
+          : "Budget pacing is healthy for the current month.";
+
+  const hasCategoryData = categoryBreakdown.length > 0;
   const chartTooltip = {
     background: "var(--bg-card)",
     border: "1px solid var(--border-color)",
@@ -358,26 +178,21 @@ export default function Analytics() {
     boxShadow: "0 10px 24px var(--shadow-color)",
   };
 
-  const chartCardStyle = {
-    background:
-      "linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02))",
+  const getBarColor = (value) => {
+    if (value >= 20000) return "#f97316";
+    if (value >= 10000) return "#38bdf8";
+    return "#22c55e";
   };
 
   return (
     <div className="space-y-8 p-6">
-
-      {/* HEADER */}
-      <div className="surface surface-tint-1 p-6 flex flex-col gap-4">
+      <div className="surface surface-tint-1 p-6 flex flex-col gap-4 rounded-2xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.25em] text-secondary">
-              Insights
-            </p>
-            <h1 className="text-3xl font-semibold text-primary">
-              Analytics
-            </h1>
+            <p className="text-xs uppercase tracking-[0.25em] text-secondary">Analytics</p>
+            <h1 className="text-3xl font-semibold text-primary">Financial Signals</h1>
             <p className="text-sm text-secondary mt-1">
-              Monthly spend trends and category distribution.
+              This page turns transactions into trend movement, budget risk, and category concentration.
             </p>
           </div>
 
@@ -389,200 +204,162 @@ export default function Analytics() {
           </button>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="surface-muted surface-tint-2 p-4 rounded-2xl">
-            <p className="text-xs text-secondary uppercase tracking-[0.2em]">
-              This Month
-            </p>
-            <p className="text-2xl font-semibold text-primary mt-2">
-              <span data-amount>{formatCurrency(thisMonthTotal)}</span>
-            </p>
-          </div>
-          <div className="surface-muted surface-tint-3 p-4 rounded-2xl">
-            <p className="text-xs text-secondary uppercase tracking-[0.2em]">
-              Last Month
-            </p>
-            <p className="text-2xl font-semibold text-primary mt-2">
-              <span data-amount>{formatCurrency(lastMonthTotal)}</span>
-            </p>
-          </div>
-          <div className="surface-muted surface-tint-4 p-4 rounded-2xl">
-            <p className="text-xs text-secondary uppercase tracking-[0.2em]">
-              Forecast
-            </p>
-            <p className="text-2xl font-semibold text-primary mt-2">
-              <span data-amount>{formatCurrency(forecastNextMonth)}</span>
-            </p>
-          </div>
-          <div className="surface-muted surface-tint-5 p-4 rounded-2xl">
-            <p className="text-xs text-secondary uppercase tracking-[0.2em]">
-              Top Category
-            </p>
-            <p className="text-xl font-semibold text-primary mt-2">
-              {topCategory?.name || "—"}
-            </p>
-            <p className="text-sm text-secondary">
-              {topCategory ? (
-                <span data-amount>{formatCurrency(topCategory.value)}</span>
-              ) : (
-                "No data yet"
-              )}
-            </p>
-          </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 border-t border-[color:var(--border-color)] pt-4">
+          <MetricCard label="This Month" value={formatCurrency(thisMonthTotal)} tone="surface-tint-2" />
+          <MetricCard label="Avg / Day" value={formatCurrency(avgDailySpend)} tone="surface-tint-3" />
+          <MetricCard label="Forecast" value={formatCurrency(forecastNextMonth)} tone="surface-tint-4" />
+          <MetricCard
+            label="Budget Usage"
+            value={budget > 0 ? `${budgetUsage}%` : "Not set"}
+            tone="surface-tint-5"
+          />
         </div>
       </div>
 
-      {/* SEARCH + FILTER */}
       <div className="surface surface-tint-6 p-6 rounded-2xl flex flex-col gap-4 lg:flex-row">
-
         <input
           type="text"
           placeholder="Search expense..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(event) => setSearch(event.target.value)}
           className="border px-3 py-2 rounded w-full bg-transparent text-primary placeholder:text-secondary"
         />
 
         <select
           value={categoryFilter}
-          onChange={(e) =>
-            setCategoryFilter(e.target.value)
-          }
+          onChange={(event) => setCategoryFilter(event.target.value)}
           className="border px-3 py-2 rounded bg-transparent text-primary"
         >
           <option value="All">All</option>
-          <option value="Food">Food</option>
-          <option value="Travel">Travel</option>
-          <option value="Housing">Housing</option>
-          <option value="Shopping">Shopping</option>
-          <option value="Other">Other</option>
+          {CATEGORY_ORDER.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
         </select>
       </div>
 
-      {/* PIE CHART */}
-      <div className="surface surface-tint-2 p-6 rounded-2xl" style={chartCardStyle}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-primary">
-            Category Breakdown
-          </h2>
-          <span className="text-xs text-secondary uppercase tracking-[0.2em]">
-            Share
-          </span>
+      <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="surface surface-tint-2 p-6 rounded-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-primary">Monthly Trend</h2>
+            <span className="text-xs text-secondary uppercase tracking-[0.2em]">6 months</span>
+          </div>
+
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={monthlyTrend}>
+              <CartesianGrid stroke="#1f2a3d" strokeDasharray="4 6" vertical={false} />
+              <XAxis dataKey="label" stroke="var(--text-secondary)" />
+              <YAxis stroke="var(--text-secondary)" />
+              <Tooltip contentStyle={chartTooltip} />
+              <Bar dataKey="total" radius={[12, 12, 8, 8]} animationDuration={900}>
+                {monthlyTrend.map((entry) => (
+                  <Cell key={entry.label} fill={getBarColor(entry.total)} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
 
-        <ResponsiveContainer width="100%" height={340}>
-          <PieChart>
-            <Pie
-              data={pieDisplayData}
-              dataKey="value"
-              nameKey="name"
-              innerRadius={0}
-              outerRadius={120}
-              paddingAngle={2}
-              stroke="var(--bg-card)"
-              strokeWidth={2}
-              cornerRadius={6}
-              animationDuration={900}
-              label={({ name, value }) =>
-                hasPieData ? `${name} — ${formatCurrency(value)}` : ""
-              }
-            >
-              {!hasPieData && (
-                <text
-                  x="50%"
-                  y="50%"
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  style={{ fill: "var(--text-secondary)", fontSize: 12 }}
-                >
-                  No Data
-                </text>
-              )}
-              {pieDisplayData.map((entry, index) => (
-                <Cell
-                  key={index}
-                  fill={
-                    hasPieData
-                      ? getValueColor(entry.value)
-                      : dark
-                        ? "#1f2937"
-                        : "#e5e7eb"
-                  }
-                />
-              ))}
-            </Pie>
-            <Tooltip contentStyle={chartTooltip} />
-            <Legend
-              verticalAlign="bottom"
-              height={36}
-              iconType="circle"
-              formatter={(value) => (
-                <span style={{ color: "var(--text-secondary)" }}>
-                  {value}
-                </span>
-              )}
-            />
-          </PieChart>
-        </ResponsiveContainer>
+        <div className="surface surface-tint-3 p-6 rounded-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-primary">Category Breakdown</h2>
+            <span className="text-xs text-secondary uppercase tracking-[0.2em]">share</span>
+          </div>
+
+          <ResponsiveContainer width="100%" height={320}>
+            <PieChart>
+              <Pie
+                data={hasCategoryData ? categoryBreakdown : [{ name: "No data", value: 1 }]}
+                dataKey="value"
+                nameKey="name"
+                innerRadius={60}
+                outerRadius={110}
+                paddingAngle={3}
+                label={({ name, value }) => (hasCategoryData ? `${name} ${formatCurrency(value)}` : "")}
+              >
+                {(hasCategoryData ? categoryBreakdown : [{ name: "No data", value: 1 }]).map((entry) => (
+                  <Cell
+                    key={entry.name}
+                    fill={
+                      entry.name === "No data"
+                        ? "#334155"
+                        : getBarColor(entry.value)
+                    }
+                  />
+                ))}
+              </Pie>
+              <Tooltip contentStyle={chartTooltip} />
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                formatter={(value) => <span style={{ color: "var(--text-secondary)" }}>{value}</span>}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      {/* MONTHLY COMPARISON */}
-      <div className="surface surface-tint-3 p-6 rounded-2xl" style={chartCardStyle}>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-primary">
-            Monthly Comparison
-          </h2>
-          <span className="text-xs text-secondary uppercase tracking-[0.2em]">
-            Trend
+      <div className="grid gap-6 lg:grid-cols-3">
+        <InsightCard
+          title="Weekly Delta"
+          eyebrow="Momentum"
+          body={
+            previousWeekTotal > 0
+              ? `${weeklyDelta >= 0 ? "Up" : "Down"} ${Math.abs(weeklyDeltaPct)}% vs last week`
+              : "Need more weekly data for comparison"
+          }
+          detail={`This week: ${formatCurrency(thisWeekTotal)} | Last week: ${formatCurrency(previousWeekTotal)}`}
+        />
+        <InsightCard
+          title="Top Category"
+          eyebrow="Concentration"
+          body={topCategory ? `${topCategory.name} is leading spend.` : "No dominant category yet."}
+          detail={topCategory ? formatCurrency(topCategory.value) : "Add more expenses to unlock this signal."}
+        />
+        <InsightCard
+          title="Budget Signal"
+          eyebrow="Risk"
+          body={budgetSignal}
+          detail={budget > 0 ? `Budget: ${formatCurrency(budget)}` : "No monthly budget configured."}
+        />
+      </div>
+
+      <div className="surface surface-tint-4 p-6 rounded-2xl">
+        <div className="flex items-center justify-between gap-4 flex-wrap">
+          <h2 className="text-xl font-semibold text-primary">Summary</h2>
+          <span className="text-sm text-secondary">
+            {filteredExpenses.length} filtered transactions
           </span>
         </div>
-
-        <ResponsiveContainer width="100%" height={340}>
-          <BarChart
-            data={[
-              { name: "Last Month", value: lastMonthTotal },
-              { name: "This Month", value: thisMonthTotal },
-            ]}
-          >
-            <defs>
-              <linearGradient id="barFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={dark ? "#a78bfa" : "#8b5cf6"} stopOpacity={0.9} />
-                <stop offset="100%" stopColor={dark ? "#22d3ee" : "#0ea5e9"} stopOpacity={0.7} />
-              </linearGradient>
-              <linearGradient id="barStroke" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor={dark ? "#c4b5fd" : "#8b5cf6"} stopOpacity={0.6} />
-                <stop offset="100%" stopColor={dark ? "#67e8f9" : "#0ea5e9"} stopOpacity={0.6} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid
-              stroke={dark ? "#1f2a3d" : "#e5e7eb"}
-              strokeDasharray="4 6"
-              vertical={false}
-            />
-            <XAxis dataKey="name" stroke="var(--text-secondary)" />
-            <YAxis stroke="var(--text-secondary)" />
-            <Tooltip contentStyle={chartTooltip} />
-            <Bar
-              dataKey="value"
-              fill="url(#barFill)"
-              stroke="url(#barStroke)"
-              strokeWidth={1}
-              radius={[14, 14, 10, 10]}
-              barSize={54}
-              animationDuration={900}
-            >
-              {[
-                { name: "Last Month", value: lastMonthTotal },
-                { name: "This Month", value: thisMonthTotal },
-              ].map((entry, index) => (
-                <Cell key={index} fill={getValueColor(entry.value)} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="mt-4 space-y-3 text-sm text-secondary border-t border-[color:var(--border-color)] pt-4">
+          <p>Trend, forecast, weekly movement, and budget pacing are shown in one place.</p>
+          <p>Merchant names map into likely categories before the expense is saved.</p>
+          <p>CSV export is still available when raw data is needed.</p>
+        </div>
       </div>
+    </div>
+  );
+}
 
-      {/* TOP CATEGORY */}
+function MetricCard({ label, value, tone }) {
+  return (
+    <div className={`surface-muted ${tone} p-4 rounded-2xl`}>
+      <p className="text-xs text-secondary uppercase tracking-[0.2em]">{label}</p>
+      <p className="text-2xl font-semibold text-primary mt-2">
+        <span data-amount>{value}</span>
+      </p>
+    </div>
+  );
+}
+
+function InsightCard({ eyebrow, title, body, detail }) {
+  return (
+    <div className="surface surface-tint-5 p-5 rounded-2xl">
+      <p className="text-xs uppercase tracking-[0.2em] text-secondary">{eyebrow}</p>
+      <h3 className="text-lg font-semibold text-primary mt-2">{title}</h3>
+      <p className="text-sm text-primary mt-3">{body}</p>
+      <p className="text-xs text-secondary mt-3">{detail}</p>
     </div>
   );
 }

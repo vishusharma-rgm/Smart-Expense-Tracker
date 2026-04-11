@@ -30,7 +30,7 @@ export default function AddIncome() {
   };
 
   return (
-    <div className="surface surface-tint-2 p-6 rounded-xl">
+    <div>
       <h2 className="text-lg font-semibold mb-4">
         Add Income
       </h2>

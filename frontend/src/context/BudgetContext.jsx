@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "../services/api";
 import { demoBudget } from "../data/demoData";
+import { useAuth } from "./AuthContext";
 
 const BudgetContext = createContext();
 
 export const BudgetProvider = ({ children }) => {
+  const { user } = useAuth();
   const [budget, setBudget] = useState(0);
   const [baseLimit, setBaseLimit] = useState(0);
   const [carriedOver, setCarriedOver] = useState(0);
@@ -105,8 +107,18 @@ export const BudgetProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    if (!user && localStorage.getItem("demo_mode") !== "true") {
+      setBudget(0);
+      setBaseLimit(0);
+      setCarriedOver(0);
+      setCategoryLimits({});
+      setRolloverEnabled(true);
+      setHistory([]);
+      setError("");
+      return;
+    }
     fetchBudget();
-  }, []);
+  }, [user]);
 
   return (
     <BudgetContext.Provider

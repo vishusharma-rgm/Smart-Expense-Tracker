@@ -25,7 +25,6 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ExpenseProvider } from "./context/ExpenseContext";
 import { IncomeProvider } from "./context/IncomeContext";
 import { BudgetProvider } from "./context/BudgetContext";
-import { ThemeProvider } from "./context/ThemeContext";
 
 function PrivateRoute({ children }) {
   const { user } = useAuth();
@@ -36,11 +35,11 @@ function PrivateRoute({ children }) {
 
 function Layout({ children }) {
   return (
-    <div className="flex h-screen text-primary bg-[var(--bg-main)] transition-all duration-500">
+    <div className="app-shell flex h-screen text-primary bg-[var(--bg-main)] transition-all duration-500">
       <Sidebar />
-      <div className="flex-1 flex flex-col relative">
+      <div className="app-main flex-1 flex flex-col relative">
         <Navbar />
-        <div className="p-8 overflow-y-auto relative z-10">
+        <div className="app-content p-8 overflow-y-auto relative z-10">
           {children}
         </div>
       </div>
@@ -58,136 +57,134 @@ function App() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ExpenseProvider>
-          <IncomeProvider>
-            <BudgetProvider>
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
+    <AuthProvider>
+      <ExpenseProvider>
+        <IncomeProvider>
+          <BudgetProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/about" element={<About />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
-                  <Route
-                    path="/dashboard"
-                    element={
-                      <PrivateRoute>
-                        <Layout>
-                          <Dashboard />
-                        </Layout>
-                      </PrivateRoute>
-                    }
-                  />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <Dashboard />
+                      </Layout>
+                    </PrivateRoute>
+                  }
+                />
 
-                  <Route
-                    path="/analytics"
-                    element={
-                      <PrivateRoute>
-                        <Layout>
-                          <Analytics />
-                        </Layout>
-                      </PrivateRoute>
-                    }
-                  />
+                <Route
+                  path="/analytics"
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <Analytics />
+                      </Layout>
+                    </PrivateRoute>
+                  }
+                />
 
-                  <Route
-                    path="/budget"
-                    element={
-                      <PrivateRoute>
-                        <Layout>
-                          <Budget />
-                        </Layout>
-                      </PrivateRoute>
-                    }
-                  />
+                <Route
+                  path="/budget"
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <Budget />
+                      </Layout>
+                    </PrivateRoute>
+                  }
+                />
 
-                  <Route
-                    path="/transactions"
-                    element={
-                      <PrivateRoute>
-                        <Layout>
-                          <Transactions />
-                        </Layout>
-                      </PrivateRoute>
-                    }
-                  />
+                <Route
+                  path="/transactions"
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <Transactions />
+                      </Layout>
+                    </PrivateRoute>
+                  }
+                />
 
-                  <Route
-                    path="/goals"
-                    element={
-                      <PrivateRoute>
-                        <Layout>
-                          <Goals />
-                        </Layout>
-                      </PrivateRoute>
-                    }
-                  />
+                <Route
+                  path="/goals"
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <Goals />
+                      </Layout>
+                    </PrivateRoute>
+                  }
+                />
 
-                  <Route
-                    path="/planner"
-                    element={
-                      <PrivateRoute>
-                        <Layout>
-                          <Planner />
-                        </Layout>
-                      </PrivateRoute>
-                    }
-                  />
+                <Route
+                  path="/planner"
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <Planner />
+                      </Layout>
+                    </PrivateRoute>
+                  }
+                />
 
-                  <Route
-                    path="/lab"
-                    element={
-                      <PrivateRoute>
-                        <Layout>
-                          <Lab />
-                        </Layout>
-                      </PrivateRoute>
-                    }
-                  />
+                <Route
+                  path="/lab"
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <Lab />
+                      </Layout>
+                    </PrivateRoute>
+                  }
+                />
 
-                  <Route
-                    path="/leaderboard"
-                    element={
-                      <PrivateRoute>
-                        <Layout>
-                          <Leaderboard />
-                        </Layout>
-                      </PrivateRoute>
-                    }
-                  />
+                <Route
+                  path="/leaderboard"
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <Leaderboard />
+                      </Layout>
+                    </PrivateRoute>
+                  }
+                />
 
-                  <Route
-                    path="/settings"
-                    element={
-                      <PrivateRoute>
-                        <Layout>
-                          <Settings />
-                        </Layout>
-                      </PrivateRoute>
-                    }
-                  />
+                <Route
+                  path="/settings"
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <Settings />
+                      </Layout>
+                    </PrivateRoute>
+                  }
+                />
 
-                  <Route
-                    path="/profile"
-                    element={
-                      <PrivateRoute>
-                        <Layout>
-                          <Profile />
-                        </Layout>
-                      </PrivateRoute>
-                    }
-                  />
-                </Routes>
-              </BrowserRouter>
-            </BudgetProvider>
-          </IncomeProvider>
-        </ExpenseProvider>
-      </AuthProvider>
-    </ThemeProvider>
+                <Route
+                  path="/profile"
+                  element={
+                    <PrivateRoute>
+                      <Layout>
+                        <Profile />
+                      </Layout>
+                    </PrivateRoute>
+                  }
+                />
+              </Routes>
+            </BrowserRouter>
+          </BudgetProvider>
+        </IncomeProvider>
+      </ExpenseProvider>
+    </AuthProvider>
   );
 }
 

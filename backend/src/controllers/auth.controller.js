@@ -4,6 +4,14 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 
+const getJwtSecret = () => {
+  const jwtSecret = (process.env.JWT_SECRET || "").trim();
+  if (!jwtSecret) {
+    throw new Error("JWT_SECRET is not configured.");
+  }
+  return jwtSecret;
+};
+
 const sendEmail = async ({ to, subject, html, text }) => {
   const resendApiKey = (process.env.RESEND_API_KEY || "").trim();
   const smtpFrom = process.env.SMTP_FROM || process.env.SMTP_USER;
@@ -118,7 +126,7 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const jwtSecret = process.env.JWT_SECRET || 'dev-secret-change-me';
+    const jwtSecret = getJwtSecret();
     const token = jwt.sign(
       { id: user._id },
       jwtSecret,
@@ -229,6 +237,10 @@ export const resetPassword = async (req, res) => {
 
 export const testEmail = async (req, res) => {
   try {
+    if (process.env.ENABLE_EMAIL_TEST_ROUTE !== "true") {
+      return res.status(404).json({ message: "Not found" });
+    }
+
     const testTo = process.env.SMTP_USER || process.env.TEST_EMAIL_TO;
     if (!testTo) {
       return res.status(500).json({ message: "Set SMTP_USER or TEST_EMAIL_TO for test email." });

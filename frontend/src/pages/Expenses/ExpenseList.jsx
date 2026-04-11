@@ -30,7 +30,7 @@ export default function ExpenseList() {
       {expenses.map((exp, index) => (
         <div
           key={exp._id}
-          className={`surface ${tints[index % tints.length]} p-4 rounded flex justify-between items-center`}
+          className={`surface ${tints[index % tints.length]} expense-list__item p-4 rounded flex justify-between items-center gap-4`}
         >
           {editingId === exp._id ? (
             <>
@@ -59,13 +59,13 @@ export default function ExpenseList() {
           ) : (
             <>
               <div>
-                <p className="font-semibold">{exp.title}</p>
-                <p className="text-sm text-gray-500">
+                <p className="font-semibold text-primary">{exp.title}</p>
+                <p className="text-sm text-secondary">
                   {exp.category} • <span data-amount>{formatCurrency(exp.amount)}</span>
                 </p>
               </div>
 
-              <div className="space-x-2">
+              <div className="expense-list__actions space-x-2">
                 <button
                   onClick={() => startEdit(exp)}
                   className="bg-blue-600 text-white px-3 py-1 rounded"

@@ -1,10 +1,12 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "../services/api";
 import { demoIncomes } from "../data/demoData";
+import { useAuth } from "./AuthContext";
 
 const IncomeContext = createContext();
 
 export const IncomeProvider = ({ children }) => {
+  const { user } = useAuth();
   const [incomes, setIncomes] = useState([]);
 
   const fetchIncome = async () => {
@@ -82,8 +84,12 @@ export const IncomeProvider = ({ children }) => {
   };
 
   useEffect(() => {
+    if (!user && localStorage.getItem("demo_mode") !== "true") {
+      setIncomes([]);
+      return;
+    }
     fetchIncome();
-  }, []);
+  }, [user]);
 
   return (
     <IncomeContext.Provider

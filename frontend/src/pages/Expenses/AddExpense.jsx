@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useExpenses } from "../../context/ExpenseContext";
 import { detectCategory } from "../../utils/categoryRules";
 
-export default function AddExpense() {
+export default function AddExpense({ headerAction = null }) {
   const { addExpense } = useExpenses();
 
   const [form, setForm] = useState({
@@ -54,11 +54,16 @@ export default function AddExpense() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 surface surface-tint-1 p-6 rounded-lg"
+      className="space-y-4"
     >
-      <h2 className="text-lg font-semibold mb-2">
-        Add Expense
-      </h2>
+      <div className="mb-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">
+            Add Expense
+          </h2>
+        </div>
+        {headerAction ? <div className="shrink-0">{headerAction}</div> : null}
+      </div>
 
       <input
         name="title"
@@ -68,6 +73,9 @@ export default function AddExpense() {
         className="w-full border px-3 py-2 rounded"
         required
       />
+      <p className="text-xs text-secondary">
+        Smart category: <strong>{form.category}</strong>
+      </p>
 
       <input
         name="amount"

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import AuthShell from "../../components/layout/AuthShell";
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -25,27 +26,32 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
-      <div className="w-full max-w-md bg-white border rounded-lg p-8 space-y-4">
-        <h1 className="text-lg font-semibold">Reset Password</h1>
-        <form onSubmit={handleReset} className="space-y-3">
-          <input
-            type="password"
-            placeholder="New password"
-            className="w-full border rounded-md px-3 py-2 text-sm"
-            value={newPass}
-            onChange={(e) => setNewPass(e.target.value)}
-            required
-          />
-          <button className="w-full bg-black text-white py-2 rounded-md">
-            Set new password
-          </button>
-        </form>
-        {msg && <p className="text-xs text-gray-600">{msg}</p>}
-        <Link to="/login" className="text-xs underline text-gray-500">
-          Back to sign in
-        </Link>
-      </div>
-    </div>
+    <AuthShell
+      eyebrow="Reset access"
+      title="Reset Password"
+      description="Create a fresh password and return to the same dark workspace without visual jumps."
+      footer={(
+        <p className="auth-page__meta">
+          <Link to="/login" className="auth-page__text-link">
+            Back to sign in
+          </Link>
+        </p>
+      )}
+    >
+      <form onSubmit={handleReset} className="auth-form">
+        <input
+          type="password"
+          placeholder="New password"
+          className="auth-form__input"
+          value={newPass}
+          onChange={(e) => setNewPass(e.target.value)}
+          required
+        />
+        <button className="auth-form__submit">
+          Set new password
+        </button>
+      </form>
+      {msg && <p className="auth-form__message">{msg}</p>}
+    </AuthShell>
   );
 }

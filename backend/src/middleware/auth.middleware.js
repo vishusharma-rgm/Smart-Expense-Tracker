@@ -1,6 +1,14 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+const getJwtSecret = () => {
+  const jwtSecret = (process.env.JWT_SECRET || "").trim();
+  if (!jwtSecret) {
+    throw new Error("JWT_SECRET is not configured.");
+  }
+  return jwtSecret;
+};
+
 export const protect = async (req, res, next) => {
   let token;
 
@@ -11,7 +19,7 @@ export const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(" ")[1];
 
-      const jwtSecret = process.env.JWT_SECRET || "dev-secret-change-me";
+      const jwtSecret = getJwtSecret();
       const decoded = jwt.verify(token, jwtSecret);
 
       req.user = await User.findById(decoded.id).select("-password");

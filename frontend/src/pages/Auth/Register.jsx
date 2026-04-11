@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../services/api";
+import AuthShell from "../../components/layout/AuthShell";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -35,67 +36,56 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md">
-
-        <h2 className="text-xl font-semibold mb-6">
-          Create Account
-        </h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-
-          <input
-            type="text"
-            name="name"
-            placeholder="Full Name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full border px-4 py-2 rounded-lg"
-            required
-          />
-
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            className="w-full border px-4 py-2 rounded-lg"
-            required
-          />
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            className="w-full border px-4 py-2 rounded-lg"
-            required
-          />
-
-          {error && (
-            <p className="text-red-500 text-sm">
-              {error}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            className="w-full bg-black text-white py-2 rounded-lg"
-          >
-            Register
-          </button>
-
-        </form>
-
-        <p className="text-sm text-gray-500 mt-4">
+    <AuthShell
+      eyebrow="Create account"
+      title="Open your workspace"
+      description="Set up your account once, then keep the whole product in a stable dark interface."
+      footer={(
+        <p className="auth-page__meta">
           Already have an account?{" "}
-          <Link to="/" className="font-medium underline">
+          <Link to="/login" className="auth-page__text-link">
             Sign in
           </Link>
         </p>
-      </div>
-    </div>
+      )}
+    >
+      <form onSubmit={handleSubmit} className="auth-form">
+        <input
+          type="text"
+          name="name"
+          placeholder="Full Name"
+          value={form.name}
+          onChange={handleChange}
+          className="auth-form__input"
+          required
+        />
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          className="auth-form__input"
+          required
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+          className="auth-form__input"
+          required
+        />
+
+        {error && <p className="auth-form__message auth-form__message--error">{error}</p>}
+
+        <button type="submit" className="auth-form__submit">
+          Create Account
+        </button>
+      </form>
+    </AuthShell>
   );
 }

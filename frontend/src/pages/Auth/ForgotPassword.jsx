@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../../services/api";
+import AuthShell from "../../components/layout/AuthShell";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -18,29 +19,33 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
-      <div className="w-full max-w-md bg-white border rounded-lg p-8 space-y-6">
-        <h1 className="text-lg font-semibold">Forgot Password</h1>
-        <form onSubmit={requestToken} className="space-y-3">
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full border rounded-md px-3 py-2 text-sm"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <button className="w-full bg-black text-white py-2 rounded-md">
-            Get reset token
-          </button>
-        </form>
+    <AuthShell
+      eyebrow="Recovery"
+      title="Forgot Password"
+      description="Enter your email and we will send the reset flow without changing the rest of your workspace."
+      footer={(
+        <p className="auth-page__meta">
+          <Link to="/login" className="auth-page__text-link">
+            Back to sign in
+          </Link>
+        </p>
+      )}
+    >
+      <form onSubmit={requestToken} className="auth-form">
+        <input
+          type="email"
+          placeholder="Email"
+          className="auth-form__input"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <button className="auth-form__submit">
+          Get reset token
+        </button>
+      </form>
 
-        {msg && <p className="text-xs text-gray-600">{msg}</p>}
-
-        <Link to="/login" className="text-xs underline text-gray-500">
-          Back to sign in
-        </Link>
-      </div>
-    </div>
+      {msg && <p className="auth-form__message">{msg}</p>}
+    </AuthShell>
   );
 }

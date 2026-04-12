@@ -32,6 +32,7 @@ export default function BarChart({ expenses }) {
               />
             </div>
           </div>
+          // rtyuiop
         ))
       )}
     </div>
